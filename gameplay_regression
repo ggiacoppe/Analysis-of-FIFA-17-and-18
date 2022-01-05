@@ -1,0 +1,124 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+import seaborn as sns
+sns.set()
+
+
+fifa_subset = fifa_2017[['Club', 'Weak_foot','Skill_Moves', 'Ball_Control', 'Dribbling',
+       'Marking', 'Sliding_Tackle', 'Standing_Tackle', 'Aggression',
+       'Reactions', 'Attacking_Position', 'Interceptions', 'Vision',
+       'Composure', 'Crossing', 'Short_Pass', 'Long_Pass', 'Acceleration',
+       'Speed', 'Stamina', 'Strength', 'Balance', 'Agility', 'Jumping',
+       'Heading', 'Shot_Power', 'Finishing', 'Long_Shots', 'Curve',
+       'Freekick_Accuracy', 'Penalties', 'Volleys', 'GK_Positioning',
+       'GK_Diving', 'GK_Kicking', 'GK_Handling', 'GK_Reflexes']]
+
+#Creating brackets of Club pairs
+data_pairs=list(map(list, zip(fifa_subset.loc[:384, 'Club'], fifa_subset.loc[385:, 'Club'])))
+data_pairs
+
+#Simulating gameplay between teams.
+def game_sim(team1,team2):
+   
+    team1wins=0
+    team2wins=0
+    for team in data_pairs:
+         
+            if (meanofsum[0]) > (meanofsum[1]):
+                team1wins+=1
+                return ('Team:', team1, 'has a number of wins of', team1wins)
+            elif (meanofsum[0]) == (meanofsum[1]):
+                return("Teams have tied!")
+            else:
+                team2wins+=1
+                return ('Team:', team2, 'has a number of wins of', team2wins)
+            
+
+        
+game_sim('Arsenal','Roma')
+
+#Covariance between player features
+#'Ball_Control', 'Dribbling','Marking', 'Sliding_Tackle', 'Standing_Tackle', 'Aggression','Reactions', 'Attacking_Position', 'Interceptions', 'Vision','Composure', 'Crossing', 'Short_Pass', 'Long_Pass', 'Acceleration','Speed', 'Stamina', 'Strength', 'Balance', 'Agility', 'Jumping','Heading', 'Shot_Power', 'Finishing', 'Long_Shots', 'Curve',
+(fifa_subset['Ball_Control'].cov(fifa_subset['Speed']))
+(fifa_subset['Ball_Control'].cov(fifa_subset['Dribbling']))
+(fifa_subset['Ball_Control'].cov(fifa_subset['Agility']))
+(fifa_subset['Ball_Control'].cov(fifa_subset['Interceptions']))
+(fifa_subset['Ball_Control'].cov(fifa_subset['Balance']))
+print(fifa_subset.cov())
+#Correlation coefficient
+print(fifa_subset.corr())
+
+#Taking two distinct feautres and plotting them
+x=fifa_subset['Dribbling']
+y=fifa_subset['Ball_Control']
+plt.scatter(x,y)
+
+fifa_subset.info()
+#Heatmap of player features
+plt.figure(figsize=(30,30))
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+sns.heatmap(fifa_subset.corr(), annot=True)
+
+
+#Correlations between top features
+X_m = fifa_subset[['Vision', 'Composure', 'Strength', 'Long_Shots']]
+y_m = fifa_subset[['Freekick_Accuracy']]
+X_m.corr()
+#Smaller version of heatmap
+plt.figure(figsize=(10,6))
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+sns.heatmap(X_m.corr(), annot=True)
+plt.show()
+#Plot to show no corr. between strength and freekick acc. features 
+plt.scatter(x='Strength', y='Freekick_Accuracy', data=fifa_subset)
+sns.distplot(fifa_subset['Freekick_Accuracy'])
+
+#Linear Regression on the feature Vision and Freekick_Accuracy
+from sklearn.linear_model import LinearRegression
+X = fifa_subset[['Vision']]
+y = fifa_subset[['Freekick_Accuracy']]
+reg = LinearRegression()
+reg.fit(X, y)
+reg.score(X,y)
+reg.coef_
+
+#Scaled Linear Regression 
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+regression = LinearRegression()
+plt.scatter(x='Vision', y='Freekick_Accuracy', data=fifa_subset, alpha=0.2)
+regression.fit(X_scaled, y)
+plt.show()
+
+#For Multiple Lin. Reg adj. R-squared is much more useful 
+r2 = r.score(X_m, y_m)
+n=X_m.shape[0]
+p = y_m.shape[1]
+ar = 1-(1-r2) *(n-1)/(n-p-1)
+print(ar)
+
+
+#Check if adj r2 < r2, one or more of the predictors have no explanatory values
+from sklearn.feature_selection import f_regression
+freg = f_regression(X_m, y_m)
+p = freg[1]
+print(p.round(3))
+
+#Basic Linear Reg. plot
+model=LinearRegression(fit_intercept = True)
+x=fifa_subset['Vision'] #
+y=fifa_subset['Freekick_Accuracy']   #
+model.fit(x[:,np.newaxis],y)
+xfit=np.linspace(0,90,100)
+yfit=model.predict(xfit[:,np.newaxis])
+plt.scatter(x,y)
+plt.plot(xfit,yfit,color='red')
+
+print('Model slope:', model.coef_[0])
+print('Model intercept:', model.intercept_)
+print('Regression Line:',model.coef_[0],'* x +',model.intercept_)
+print('R^2 value: ',model.score(x[:,np.newaxis],y))
